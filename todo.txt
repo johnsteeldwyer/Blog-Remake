@@ -1,0 +1,4 @@
+- add comments
+- reverse post order
+- search function
+- add pic thumbnail to post preview

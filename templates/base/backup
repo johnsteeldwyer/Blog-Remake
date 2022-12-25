@@ -1,0 +1,28 @@
+        <!-- Main Content-->
+        <div class="container px-4 px-lg-5">
+            <div class="row gx-4 gx-lg-4 justify-content-center">
+                <div class="col-md-10 col-lg-8 col-xl-7">
+                    <!-- Post preview-->
+                    {% for post in posts %}
+                            <div class="post-preview post-background" style="" >
+                                <a href="{{ url_for('post', num=post['num']) }}">
+                                    <h2 class="post-title">{{ post['title'] }}</h2>
+                                    <h3 class="post-subtitle">{{ post['subtitle'] }}</h3>
+                                </a>
+                                <p class="post-meta">
+                                    Posted by
+                                    <a href="about">Al Dwyer</a>
+                                    on {{ post['date'] }}
+                                </p>
+                            </div>
+                    {% endfor %}
+                    <!-- Divider-->
+                    <hr class="my-4" />
+                    <!-- Pager-->
+                    <div class="d-flex mb-4 justify-content-center">
+                        <a id="newer" style="margin-right:35%!important;" class=" btn btn-primary text-uppercase" href="{{ url_for('index', current_page=prev_page) }}">← Newer Posts</a>
+                        <a id="older" class=" btn btn-primary text-uppercase" href="{{ url_for('index', current_page=next_page) }}">Older Posts →</a>
+                    </div>                
+                </div>
+            </div>
+        </div>

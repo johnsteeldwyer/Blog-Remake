@@ -1,0 +1,45 @@
+{% extends "base/base.html" %}
+{% block content %}
+<!-- Page Header-->
+<header class="masthead" style="background-image:
+    url('/static/assets/pics/post{{ post['num'] }}/post{{ post['num']
+    }}pic0.jpg')">
+    <div class="container position-relative px-4 px-lg-5">
+        <div class="row gx-4 gx-lg-5 justify-content-center">
+            <div class="col-md-10 col-lg-8 col-xl-7">
+                <div class="post-heading">
+                    <h1>{{ post['title'] }}</h1>
+                    <h2 class="subheading">{{ post['subtitle'] }}</h2>
+                    <p class="post-meta" style="color:aliceblue;">
+                        Posted by
+                        <a style="color:aliceblue;" href="about">Al Dwyer</a>
+                        on {{ post['date'] }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+<!-- Post Content-->
+<article class="mb-4">
+    <div class="container px-4 px-lg-5">
+        <div class="row gx-4 gx-lg-5 justify-content-center">
+            <div class="col-md-10 col-lg-8 col-xl-7">
+                {% for p in post['content'] %}
+                <p>{{ p }}<p>
+                {% endfor %}
+                        {% for i in range(1, captionlen) %}
+                        <figure class="figure">
+                            <img class="post-img" src="/static/assets/pics/post{{post['num']}}/post{{post['num']}}pic{{i}}.jpg">
+                            <figcaption class="figure-caption">{{ post['captions'][i] }}</figcaption>
+                        </figure>
+                    {% endfor%}
+                        <p>Categories:
+                            {% for category in post['categories'] %}
+                            <a href=''>{{ category }}</a>
+                            {% endfor%}
+                </div>
+            </div>
+        </div>
+    </article>
+    {% endblock %}
