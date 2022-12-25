@@ -17,7 +17,7 @@ def index(current_page):
     page = int(current_page)
     last_post = page * 5
     page_posts = data[last_post : (last_post + 5)]
-
+ 
     prev_page = page - 1
     if prev_page < 0:
         prev_page = 0
