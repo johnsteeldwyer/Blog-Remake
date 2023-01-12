@@ -1,0 +1,6 @@
+- add comments
+- search function
+- contact - use a form
+- make top bar text a little bigger so search bar isn't too big (or shrink search bar)
+- add authentication so only admins can create posts
+- image upload (flask)

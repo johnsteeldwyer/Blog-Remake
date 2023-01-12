@@ -1,0 +1,80 @@
+{% extends "base/base.html" %}
+{% block content %}
+<!-- Page Header-->
+<header class="masthead" style="background-image:
+    url('static/assets/index.jpg')">
+    <div class="container position-relative px-4 px-lg-5">
+        <div class="row gx-4 gx-lg-5 justify-content-center">
+            <div class="col-md-10 col-lg-8 col-xl-7">
+                <div class="site-heading">
+                    <h1 class="main-title">What-Where Next?</h1>
+                    <span class="subheading">……commentary from the road</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+<!-- Main Content-->
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-12 col-lg-10 col-xl-10">
+            <!-- Post preview-->
+            {% for post in posts %}
+            <div class="row justify-content-start">
+                <div class="col-12 post-preview">
+                    <a href="{{ url_for('post', id=post['id']) }}">
+                        <div id="previewbox" class="row justify-content-start post-link-box" style="position: relative;">
+                            <div class="col-8">
+                                <h2 class="post-title">{{ post.title }}</h2>
+                                <h3 class="post-subtitle">{{ post.subtitle }}</h3>
+                            </div>
+                            <div class="col-4" style="position:absolute; right: 0;">
+                                <img class="preview-img" style="height:100%" src="static/assets/pics/post{{post.id}}/pic0.jpg">
+                            </div>
+                        </div>
+                    </a>
+                    <div class="meta-overlay">
+                        <p class="post-meta">
+                            Posted by
+                            <a href="about">Al Dwyer</a>
+                            on {{ post.date }}
+                        </p>
+                    </div>
+
+    
+                </div>
+            </div>
+            {% endfor %}
+            <!-- Divider-->
+            <hr class="my-4" />
+        </div>
+    </div>
+</div>
+<div class="container">
+    <!-- Pager-->
+    <div class="d-flex mb-4 justify-content-center">
+        <a id="newer" style="margin-right:25%!important; visibility:hidden" class=" btn
+            btn-primary text-uppercase" href="{{ url_for('index',
+            current_page=prev_page) }}">← Newer Posts</a>
+        <a id="older" class=" btn btn-primary text-uppercase" href="{{
+            url_for('index', current_page=next_page) }}">Older Posts →</a>
+    </div>
+</div>
+<script>
+            let arr = window.location.pathname.split('/')
+            pageNumber = arr[arr.length - 1]
+            console.log(pageNumber)
+            pageNumInt = parseInt(pageNumber)
+            
+            if(pageNumInt > 0) {
+                document.getElementById('newer').style.visibility = 'visible';
+            } 
+            
+            numberPosts = document.querySelectorAll('.post-preview').length;
+            if(numberPosts < 5) {
+                document.getElementById('older').style.visibility = 'hidden';
+            } else {
+                document.getElementById('older').style.visibility = 'visible';
+            }
+        </script>
+{% endblock %}
