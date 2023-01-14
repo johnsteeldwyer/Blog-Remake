@@ -4,9 +4,9 @@ import os
 import requests
 import shutil
 
-PICS_PATH = "your/pic/path"
+PICS_PATH = "static/assets/pics"
 
-with open(file="blog.html", encoding="UTF-8", mode="r") as f:
+with open(file="scraper/blog.html", encoding="UTF-8", mode="r") as f:
     contents = f.read()
     soup = BeautifulSoup(contents, "html.parser")
 
@@ -32,22 +32,23 @@ with open(file="blog.html", encoding="UTF-8", mode="r") as f:
         if "Categories : " in small.text:
             categories_nonlist = small.text.split(": ")[1]
             categories_listed = categories_nonlist.split(", ")
-            categories.append(categories_listed)
+            post_categories = ''
+            for cat in categories_listed:
+                post_categories += f"{cat}//"
+            categories.append(post_categories)
 
     # Content
     posts = soup.find_all("div", attrs={"class": "entry"})
     content = []
     subtitles = []
     captions = []
+    counter = 30
     for i, post in enumerate(posts):
 
         # Imgs and Captions
         img_figs = post.find_all('figure')
-        img_captions = []
-        
-        img_figs = post.find_all('figure')
-        img_captions = []
-        
+        img_captions = ''
+        images = []
         # Combine img links and captions
         for k, fig in enumerate(img_figs):
             try:
@@ -58,20 +59,23 @@ with open(file="blog.html", encoding="UTF-8", mode="r") as f:
                 caption = fig.find("figcaption").text
             except AttributeError:
                 caption = None
-            img_captions.append(caption)
+            images.append(img)
+            img_captions += f"{caption}//"
         captions.append(img_captions)
         
-        try:
-            os.mkdir(f"{PICS_PATH}/post{i}")
-        except:
-            shutil.rmtree(f"{PICS_PATH}/post{i}")	
-            os.mkdir(f"{PICS_PATH}/post{i}")
-        
-        for j, img in enumerate(images):
-            r = requests.get(img[f'img_{j}']['img_link']).content
-            with open(f"{PICS_PATH}/post{i}/post{i}pic{j}.jpg","wb+") as f:
-                f.write(r)
+        # Make folders
+        # try:
+        #     os.mkdir(f"{PICS_PATH}/post{counter}")
+        # except:
+        #     shutil.rmtree(f"{PICS_PATH}/post{counter}")	
+        #     os.mkdir(f"{PICS_PATH}/post{counter}")
 
+        # for j, img in enumerate(images):
+        #     r = requests.get(img).content
+        #     with open(f"{PICS_PATH}/post{counter}/pic{j}.jpg","wb+") as f:
+        #         f.write(r)
+        counter -= 1
+        
         # Text and Subs
         ps = []
         sections = post.find_all("p")
@@ -83,14 +87,22 @@ with open(file="blog.html", encoding="UTF-8", mode="r") as f:
             subtitles.append(sections[0].text)
         for i in range(1, len(sections)):
             ps.append(sections[i].text)
-        content.append(ps)
-    
+        
+        # Add html paragraph styling
+        styled_ps = ''
+        for i,p in enumerate(ps):
+            ps[i] = f"<p>{p}</p>"
+            styled_ps += ps[i]
+        content.append(styled_ps)  
+
+
 # Create Posts
 blog_posts = []
+counter = len(titles)
 for i, title in enumerate(titles):
     blog_posts.append(
         {
-            "num": i,
+            "id": counter,
             "date": dates[i],
             "title": titles[i],
             "subtitle": subtitles[i],
@@ -99,6 +111,8 @@ for i, title in enumerate(titles):
             "captions": captions[i]
         }
     )
+    counter -= 1
+
     
 blog_posts_json = (json.dumps(blog_posts))
 with open(file="posts.txt", encoding="utf-8", mode="w") as file:

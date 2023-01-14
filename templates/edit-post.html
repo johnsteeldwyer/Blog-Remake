@@ -1,0 +1,45 @@
+
+{% extends "base/base.html" %}
+
+{% block content %}
+  <!-- Page Header-->
+  <header class="masthead" style="background-image: url('static/assets/new-post.jpg')">
+      <div class="container position-relative px-4 px-lg-5">
+          <div class="row gx-4 gx-lg-5 justify-content-center">
+              <div class="col-md-10 col-lg-8 col-xl-7">
+                  <div class="site-heading">
+                      <h1 class="main-title">Edit Post</h1>
+                      <span class="subheading">We all make mistakes!</span>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </header>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        
+      <form method="post" enctype="multipart/form-data">
+        {{ form.csrf_token }}
+        <div class="form-box">{{ form.title.label(class_='form-label') }}<br>{{ form.title() }}</div>
+        <div class="form-box">{{ form.subtitle.label(class_='form-label') }}<br>{{ form.subtitle() }}</div>
+        <div class="form-box">{{ form.body.label(class_='form-label') }}<br>{{ form.body() }}</div>
+        <div class="form-box">{{ form.categories.label(class_='form-label') }}<br>{{ form.categories() }}</div>
+
+        {{ form.submit(class_='form-submit', label='Save Changes') }}
+      </form>
+      <p style="color:red; text-align:center">If you want to change your photos, you will have to delete this post and create it again!</p>
+        <p>
+        {% if form.errors %}
+        {{ form.errors }}
+        {% endif %}
+
+         {{ ckeditor.load() }}
+         {{ ckeditor.config(name='body') }}
+         </body>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}

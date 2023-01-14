@@ -20,16 +20,17 @@
     <div class="row">
       <div class="col-lg-8 col-md-10 mx-auto">
         
-          <!-- This is where the form will go -->
-          <form method="post" enctype="multipart/form-data">
-            {{ form.csrf_token }}
-            <div class="form-box">{{ form.title.label(class_='form-label') }}{{ form.title() }}</div>
-            <div class="form-box">{{ form.subtitle.label(class_='form-label') }}<br>{{ form.subtitle(size=50) }}</div>
-            <div class="form-box">{{ form.body.label(class_='form-label') }}<br>{{ form.body() }}</div>
-            <div class="form-box">{{ form.photo.label(class_='form-label') }}<br>{{ form.photo() }}</div>
+      <form method="post" enctype="multipart/form-data">
+        {{ form.csrf_token }}
+        {% for field in form %}
+          {% if field.type != 'CSRFTokenField' and field.type != 'SubmitField' %}
+          <div class="form-box">{{ field.label(class_='form-label') }}<br>{{ field() }}</div>
+          {% endif %}
+        {% endfor %}
+        {{ form.submit(class_='form-submit') }}
+      </form>
 
-            {{ form.submit(class_='form-submit') }}
-        </form>
+        <p>
         {% if form.errors %}
         {{ form.errors }}
         {% endif %}
