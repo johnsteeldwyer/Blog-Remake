@@ -19,7 +19,11 @@
         <!-- Navigation-->
         <nav class="navbar navbar-expand-lg navbar-light" id="mainNav">
             <div class="container px-4 px-lg-5">
+                {% if current_user.is_authenticated %}
+                <a class="navbar-brand" href="/">Hello, {{current_user.username.split()[0]}}</a>
+                {% else %}
                 <a class="navbar-brand" href="/">aldwyer.com</a>
+                {%endif%}
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
                     Menu
                     <i class="fas fa-bars"></i>
@@ -29,7 +33,14 @@
                         <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="/">Home</a></li>
                         <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="/about">About</a></li>
                         <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="/gallery">Gallery </a></li>
+                        {% if current_user.id == 1 %}
                         <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="/create-post">Create Post </a></li>
+                        {%endif%}
+                        {% if current_user.is_authenticated %}
+                        <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="/logout">Logout </a></li>
+                        {% else %}
+                        <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="/register-login">Login/Register </a></li>
+                        {%endif%}
                     </ul>
                     <form class=" d-flex">
                         <input class="search-bar form-control me-2" type="search" placeholder="Search" aria-label="Search">

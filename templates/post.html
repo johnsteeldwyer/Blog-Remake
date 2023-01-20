@@ -11,7 +11,7 @@
                     <h2 class="subheading">{{ post['subtitle'] }}</h2>
                     <p class="post-meta" style="color:aliceblue;">
                         Posted by
-                        <a style="color:aliceblue;" href="about">Al Dwyer</a>
+                        <a style="color:aliceblue;" href="about">{{post.author.username}}</a>
                         on {{ post['date'] }}
                     </p>
                 </div>
@@ -36,7 +36,7 @@
                             <a href=''>{{ category }}</a>
                             {% endfor%}
                 </div>
-
+                {% if current_user.id == 1 %}
                 <div class="d-flex mb-4 justify-content-center">
                     <a id="older" class=" btn btn-primary text-uppercase" href="{{
                         url_for('edit_post', id=post.id) }}">Edit Post</a>
@@ -44,12 +44,57 @@
 
                 <div class="d-flex mb-4 justify-content-center">
                     <a id="older" onclick="return warning()" class=" btn btn-primary text-uppercase" href="{{
-                        url_for('delete_post', id=post.id) }}">Delete Post</a>
+                        url_for('delete', type="post", id=post.id) }}">Delete Post</a>
                 </div>
-                
-            </div>
-        </div>
-    </article>
+                {%endif%}
+
+               <!--  Comments Area -->
+                <div class="col-lg-8 col-md-10 mx-auto comment">
+                    {% if current_user.is_authenticated %}
+                    <form method="post" enctype="multipart/form-data">
+                    {{ form.csrf_token }}
+                    {{form.comment.label(class_='form-label')}}<br>{{form.comment()}}
+                    {{form.post_comment()}}
+                    {{ ckeditor.load() }}
+                    {{ ckeditor.config(name='body') }}
+                    </form>
+                    {%else %}
+                    <p class='form-label'>Please register to post a comment</p>
+                    {% endif %}
+
+                    <ul class="commentList">
+                    {% for comment in comments %}
+                        <li>
+                        <div class="commenterImage">
+                            <img src="{{ url_for('static', filename='assets/index.jpg') }}"/>
+                        </div>
+                        <div class="commentText">
+                            <p>{{comment.comment|safe }}</p>
+                            <span class="date sub-text"><strong>{{comment.author.username}}</strong> {{comment.date}} 
+                            {% if current_user.id == 1 %}
+                            <a href="{{url_for('delete', type="comment", id = comment.id)}}"">Delete</a>
+                            {%endif%}
+                            </span>
+                        </div>
+                    </li>
+                    {%endfor%}
+                    {% if form.errors %}
+                    {% for error in form.errors %}
+                    {{ error }}
+                    {% endfor %}
+                    {% endif %}
+                    </ul>
+                </div>
+
+
+    </div>
+</div>
+</div>
+</article>
+    
+
+<hr>
+
     <script>
         function warning() {
             confirm("Clicking 'OK' will permanently delete this post and all associated images!\n\nAre you sure?")

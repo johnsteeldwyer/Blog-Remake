@@ -1,19 +1,21 @@
 import requests
 import os
 import datetime
-from flask import Flask, jsonify, render_template, request, redirect, url_for
+from forms import PostForm, RegisterForm, LoginForm, CommentForm
+from functools import wraps
+from flask import Flask, jsonify, render_template, request, redirect, url_for, flash, g, abort
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql.expression import func, and_
-from flask_ckeditor import CKEditorField, CKEditor
-from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, MultipleFileField, DateField
-from wtforms.validators import InputRequired, DataRequired
-from flask_wtf.file import FileRequired, FileField
 from werkzeug.utils import secure_filename
-
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
+from flask_ckeditor import CKEditor
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "dwyeral"
+login_manager = LoginManager()
+login_manager.init_app(app)
 
 # Connect to Database
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///blog-posts.db"
@@ -21,8 +23,21 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 ckeditor = CKEditor(app)
 
-# Blogpost TABLE Configuration
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+def admin_only(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if current_user.id != 1:
+            return abort(401)
+        return f(*args, **kwargs)
+    return decorated_function
+
+# TABLE Configurations
 class BlogPost(db.Model):
+    __tablename__ = 'blogpost'
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.String(250))
     title = db.Column(db.Text, nullable=False)
@@ -30,25 +45,32 @@ class BlogPost(db.Model):
     categories = db.Column(db.Text)
     body = db.Column(db.Text)
     captions = db.Column(db.Text)
+    author_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    author = db.relationship("User", back_populates="posts")
+    comments = db.relationship("Comment", back_populates="post")
 
 
-# Create Post Form
-class PostForm(FlaskForm):
-    submit = SubmitField("Create Post", render_kw={"style": "margin-left:45%"})
-    title = StringField(
-        "Title", validators=[DataRequired()], render_kw={"style": "width: 100%"}
-    )
-    subtitle = StringField("Subtitle", render_kw={"style": "width: 100%"})
-    body = CKEditorField("Body", validators=[DataRequired()])
-    categories = StringField("Categories (separate each category with a doubleslash, e.g. \"Location//Peru//Inca\"")
-    photo0 = FileField("Upload Cover Photo")
-    photo1 = FileField("Photo #1")
-    photo2 = FileField("Photo #2")
-    photo3 = FileField("Photo #3")
-    photo4 = FileField("Photo #4")
+class User(UserMixin, db.Model):
+    __tablename__ = 'user'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(500), unique=True)
+    email = db.Column(db.String(500), unique=True)
+    password = db.Column(db.String(500))
+    posts = db.relationship("BlogPost", back_populates="author")
+    comments = db.relationship("Comment", back_populates="author")
+    
+    
+class Comment(db.Model):
+    __tablename__ = 'comment'
+    id = db.Column(db.Integer, primary_key=True)
+    comment = db.Column(db.Text)
+    date = db.Column(db.String(250))
+    post_id = db.Column(db.Integer, db.ForeignKey("blogpost.id"))
+    post = db.relationship("BlogPost", back_populates="comments")
+    author_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    author = db.relationship("User", back_populates="comments")
 
-
-
+    
 with app.app_context():
     db.create_all()
 
@@ -75,10 +97,22 @@ def index(current_page):
     )
 
 
-@app.route("/post/<id>")
+@app.route("/post/<id>", methods=["GET", "POST"])
 def post(id):
     id = int(id)
+    form = CommentForm()
     post = db.session.execute(db.select(BlogPost).where(BlogPost.id == id)).scalar()
+    comments = db.session.execute(db.select(Comment).where(Comment.post_id == id).order_by(Comment.id.desc())).scalars()
+    if form.validate_on_submit():
+        new_comment = Comment(
+            comment = form.comment.data,
+            post_id = id,
+            author_id = current_user.id,
+            date = datetime.datetime.now().strftime("%d-%m-%Y")
+        )
+        db.session.add(new_comment)
+        db.session.commit()
+        return redirect(f"/post/{id}")
     try:
         captions = post.captions.split("//")
     except AttributeError:
@@ -93,10 +127,13 @@ def post(id):
         categories=categories,
         captions=captions,
         captionlen=len(captions),
+        form=form,
+        comments = comments
     )
 
 
 @app.route("/create-post", methods=["GET", "POST"])
+@admin_only
 def create_post():
     form = PostForm()
     last_post_id = (db.session.execute(db.select(BlogPost).order_by(BlogPost.id.desc())).scalar()).id
@@ -124,6 +161,7 @@ def create_post():
             subtitle = form.subtitle.data,
             categories = form.categories.data,
             body = form.body.data,
+            parent_id = current_user.id
             # captions = form.captions.data
         )
         db.session.add(new_post)
@@ -134,6 +172,7 @@ def create_post():
 
 
 @app.route("/edit-post/<id>", methods=["GET", "POST"])
+@admin_only
 def edit_post(id):
     post = db.session.execute(db.select(BlogPost).where(BlogPost.id == id)).scalar()
     form = PostForm(obj=post)
@@ -149,12 +188,46 @@ def edit_post(id):
     return render_template("edit-post.html", form = form)
 
 
-@app.route("/delete-post/<id>")
-def delete_post(id):
-    post = db.session.execute(db.select(BlogPost).where(BlogPost.id == id)).scalar()
-    db.session.delete(post)
-    db.session.commit()
+@app.route("/delete/<type>/<id>")
+@admin_only
+def delete(type, id):
+    if type == 'post':
+        post = db.session.execute(db.select(BlogPost).where(BlogPost.id == id)).scalar()
+        db.session.delete(post)
+        db.session.commit()
+
+    elif type == 'comment':
+        comment = db.session.execute(db.select(Comment).where(Comment.id == id)).scalar()
+        comment_id = comment.post.id
+        db.session.delete(comment)
+        db.session.commit()
+        return redirect(f"/post/{comment_id}")
     return redirect("/")
+
+
+
+@app.route("/register-login", methods=["GET", "POST"])
+def register_login():
+    form1 = RegisterForm()
+    form2 = LoginForm()
+    if form1.submit1.data and form1.validate():
+        user = User(
+            email = form1.email.data,
+            password = generate_password_hash(form1.password.data, method='pbkdf2:sha256', salt_length=24),
+            username = form1.username.data
+        )
+        db.session.add(user)
+        db.session.commit()
+        login_user(user)
+        return redirect("/")
+    if form2.submit2.data and form2.validate():
+        user = db.session.execute(db.select(User).where(User.email == form2.email.data)).scalar()
+        if user == None or not check_password_hash(user.password, form2.password.data):
+            flash('Incorrect email/password. Please contact the Administrator to reset password')
+        else:
+            login_user(user)
+            return redirect("/")
+    return render_template("register-login.html", form1 = form1, form2=form2)
 #---------------------------------STATIC PAGES BELOW----------------------------------------
 
 @app.route("/about")
@@ -181,6 +254,11 @@ def index_first():
     return redirect("/0")
 
 
+@app.route("/logout")
+def logout():
+    logout_user()
+    return redirect("/")
+    
 @app.route("/create-db")
 def create_db():
     data = requests.get("https://api.npoint.io/3eb913c6b75fee8d844d").json()
@@ -192,7 +270,8 @@ def create_db():
             subtitle = post['subtitle'],
             categories = post['categories'],
             body = post['content'],
-            captions = post['captions']
+            captions = post['captions'],
+            author_id = 1
         )
         db.session.add(new_post)
         db.session.commit()

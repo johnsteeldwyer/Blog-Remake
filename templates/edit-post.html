@@ -3,7 +3,7 @@
 
 {% block content %}
   <!-- Page Header-->
-  <header class="masthead" style="background-image: url('static/assets/new-post.jpg')">
+  <header class="masthead" style="background-image: url('{{ url_for('static', filename='assets/edit-post.jpg') }}')">
       <div class="container position-relative px-4 px-lg-5">
           <div class="row gx-4 gx-lg-5 justify-content-center">
               <div class="col-md-10 col-lg-8 col-xl-7">
@@ -27,7 +27,7 @@
         <div class="form-box">{{ form.body.label(class_='form-label') }}<br>{{ form.body() }}</div>
         <div class="form-box">{{ form.categories.label(class_='form-label') }}<br>{{ form.categories() }}</div>
 
-        {{ form.submit(class_='form-submit', label='Save Changes') }}
+        {{ form.submit(label='Save Changes') }}
       </form>
       <p style="color:red; text-align:center">If you want to change your photos, you will have to delete this post and create it again!</p>
         <p>

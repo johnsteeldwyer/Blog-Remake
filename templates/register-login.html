@@ -1,0 +1,65 @@
+{% extends "base/base.html" %}
+{% block content %}
+
+
+  <!-- Page Header-->
+  <header class="masthead" style="background-image: url('{{ url_for('static', filename='assets/new-post.jpg') }}')">
+    <div class="container position-relative px-4 px-lg-5">
+        <div class="row gx-4 gx-lg-5 justify-content-center">
+            <div class="col-md-10 col-lg-8 col-xl-7">
+                <div class="site-heading">
+                    <h1 class="main-title">Create New Post</h1>
+                    <span class="subheading">The audience is holding their breath...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+  <div class="row">
+    <div class="col-lg-6 col-md-6">
+      <div class="box">
+        <h1>Register</h1>
+          <form method="post" >
+              {{ form1.csrf_token }}
+              {% for field in form1 %}
+                {% if field.type != 'CSRFTokenField' and field.type != 'SubmitField' %}
+                <div class="form-box" >{{ field.label(class_='form-label') }}<br>{{ field() }}</div>
+                {% endif %}
+              {% endfor %}
+              
+              {{ form1.submit1(style="margin-left=0") }}
+              {% if form1.errors %}
+          <p style="color:red">{{ form1.errors['password'][0] }}</p>
+          {% endif %}
+              <p>
+            </form>
+      </div>
+    </div>
+    <div class="col-lg-6 col-md-6 mx-auto">
+      <div class="box">
+        <h1>Login</h1>
+          <form method="post" >
+              {{ form2.csrf_token }}
+              {% for field in form2  %}
+                {% if field.type != 'CSRFTokenField' and field.type != 'SubmitField' %}
+                <div class="form-box" >{{ field.label(class_='form-label') }}<br>{{ field() }}</div>
+                {% endif %}
+              {% endfor %}
+              
+              {{ form2.submit2(style="margin-left=0") }}
+              {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                {% for message in messages %}
+                <p class=error><strong>Error:</strong> {{ message }}
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+              <p>
+          </form>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
