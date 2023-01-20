@@ -263,6 +263,15 @@ def logout():
 @app.route("/create-db")
 def create_db():
     data = requests.get("https://api.npoint.io/3eb913c6b75fee8d844d").json()
+    admin = User(
+            id = 1,
+            username = "Al Dwyer",
+            email = "adwyer@gmail.com",
+            password = generate_password_hash("hello", method='pbkdf2:sha256', salt_length=24)
+    )
+    db.session.add(admin)
+    db.session.commit()
+
     for post in data:
         new_post = BlogPost(
             id = int(post['id']),
