@@ -18,7 +18,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 # Connect to Database
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL",  "sqlite:///blog.db")
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("POSTGRES_DATABASE_URL",  "sqlite:///blog.db")
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
