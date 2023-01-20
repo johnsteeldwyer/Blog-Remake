@@ -3,13 +3,12 @@ import os
 import datetime
 from forms import PostForm, RegisterForm, LoginForm, CommentForm
 from functools import wraps
-from flask import Flask, jsonify, render_template, request, redirect, url_for, flash, g, abort
+from flask import Flask, render_template, redirect, flash, abort
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.sql.expression import func, and_
-from werkzeug.utils import secure_filename
+from sqlalchemy.sql.expression import and_
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
+from flask_login import UserMixin, login_user, LoginManager, current_user, logout_user
 from flask_ckeditor import CKEditor
 
 app = Flask(__name__)
