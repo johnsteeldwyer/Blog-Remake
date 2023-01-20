@@ -1,6 +1,7 @@
 import requests
 import os
 import datetime
+from dotenv import load_dotenv
 from forms import PostForm, RegisterForm, LoginForm, CommentForm
 from functools import wraps
 from flask import Flask, render_template, redirect, flash, abort
@@ -10,14 +11,15 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, login_user, LoginManager, current_user, logout_user
 from flask_ckeditor import CKEditor
-
+load_dotenv()
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "dwyeral"
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
 login_manager = LoginManager()
 login_manager.init_app(app)
 
 # Connect to Database
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///blog-posts.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL",  "sqlite:///blog.db")
+
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 ckeditor = CKEditor(app)
