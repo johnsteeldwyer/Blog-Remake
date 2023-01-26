@@ -18,7 +18,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 # Connect to Database
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("POSTGRES_DATABASE_URL",  "sqlite:///blog.db")
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("POSTGRES_DATABASE_URL", "sqlite:///blog.db")
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
@@ -72,8 +72,8 @@ class Comment(db.Model):
     author = db.relationship("User", back_populates="comments")
 
     
-with app.app_context():
-    db.create_all()
+# with app.app_context():
+#     db.create_all()
 
 
 @app.route("/<current_page>")
