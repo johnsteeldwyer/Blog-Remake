@@ -11,6 +11,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, login_user, LoginManager, current_user, logout_user
 from flask_ckeditor import CKEditor
+
 load_dotenv()
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
@@ -18,9 +19,9 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 # Connect to Database
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///blog.db"
-#os.environ.get("POSTGRES_DATABASE_URL")
-# 
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("POSTGRES_URL")
+# os.environ.get("POSTGRES_URL")
+# "sqlite:///blog.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 ckeditor = CKEditor(app)
