@@ -18,9 +18,9 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 # Connect to Database
-app.config["SQLALCHEMY_DATABASE_URI"] = 'postgresql://cwfxhultledacn:a0b4ec139157dcbf50345490f0f4505a75bd43a39dd5c521eb3cf4b95058d66b@ec2-54-173-77-184.compute-1.amazonaws.com:5432/d5i7k77rq0f7v4'
-# os.environ.get("POSTGRES_DATABASE_URL")
-# "sqlite:///blog.db"
+print(os.environ.get("POSTGRES_DATABASE_URL", "sqlite:///blog.db"))
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
+
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 ckeditor = CKEditor(app)
