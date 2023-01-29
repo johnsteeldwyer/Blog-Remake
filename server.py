@@ -112,7 +112,7 @@ def index(current_page):
         posts=posts,
         next_page=(current_page + 1),
         prev_page=(current_page - 1),
-        # pic=pic
+        pic=pic
     )
 
 
