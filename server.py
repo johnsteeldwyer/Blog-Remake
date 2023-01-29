@@ -11,6 +11,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, login_user, LoginManager, current_user, logout_user
 from flask_ckeditor import CKEditor
+import cloudinary
+from cloudinary.uploader import upload
+from cloudinary.utils import cloudinary_url
+from cloudinary.api import root_folders, subfolders
 
 load_dotenv()
 app = Flask(__name__)
@@ -31,7 +35,7 @@ def load_user(user_id):
 def admin_only(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if current_user.id != 1:
+        if current_user.id != 1 or current_user.id != 2:
             return abort(401)
         return f(*args, **kwargs)
     return decorated_function
@@ -90,11 +94,17 @@ def index(current_page):
         .where(and_(BlogPost.id <= first_displayed, BlogPost.id > last_displayed))
         .order_by(BlogPost.id.desc())
     ).scalars()
+    
+    result = cloudinary.Search().expression("folder=post30").sort_by("public_id","asc").execute()
+    pic = result['resources'][0]['url']
+    print(result['resources'][0]['url'])
+    
     return render_template(
         "index.html",
         posts=posts,
         next_page=(current_page + 1),
         prev_page=(current_page - 1),
+        pic=pic
     )
 
 
