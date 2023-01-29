@@ -22,6 +22,14 @@ app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
 login_manager = LoginManager()
 login_manager.init_app(app)
 
+# Cloudinary Setup
+cloudinary.config(
+  cloud_name = os.environ.get("CLOUD_NAME"),
+  api_key = os.environ.get("API_KEY"),
+  api_secret = os.environ.get("API_SECRET"),
+  secure = True
+)
+
 # Connect to Database
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("POSTGRES_URL", "sqlite:///blog.db")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
