@@ -93,8 +93,8 @@ class ImageUrls(db.Model):
     post = db.relationship("BlogPost", back_populates="images")
     post_id = db.Column(db.Integer, db.ForeignKey("blogpost.id"))
     
-with app.app_context():
-    db.create_all()
+# with app.app_context():
+#     db.create_all()
 
 
 @app.route("/<current_page>")
