@@ -103,9 +103,9 @@ def index(current_page):
         .order_by(BlogPost.id.desc())
     ).scalars()
     
-    # result = cloudinary.Search().expression("folder=post30").sort_by("public_id","asc").execute()
-    # pic = result['resources'][0]['url']
-    # print(result['resources'][0]['url'])
+    result = cloudinary.Search().expression("folder=post30").sort_by("public_id","asc").execute()
+    pic = result['resources'][0]['url']
+    print(result['resources'][0]['url'])
     
     return render_template(
         "index.html",
