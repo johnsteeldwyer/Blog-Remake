@@ -285,15 +285,17 @@ def logout():
 @app.route("/create-db")
 def create_db():
     data = requests.get("https://api.npoint.io/3eb913c6b75fee8d844d").json()
-    admin = User(
-            id = 1,
-            username = "Al Dwyer",
-            email = "adwyer@gmail.com",
-            password = generate_password_hash("hello", method='pbkdf2:sha256', salt_length=24)
-    )
-    db.session.add(admin)
-    db.session.commit()
-
+    try:
+        admin = User(
+                id = 1,
+                username = "Al Dwyer",
+                email = "adwyer@gmail.com",
+                password = generate_password_hash("hello", method='pbkdf2:sha256', salt_length=24)
+        )
+        db.session.add(admin)
+        db.session.commit()
+    except:
+        pass
     for i in range(31):
         results = (cloudinary.Search().expression(f"folder=post{i}").sort_by("public_id","asc").execute())['resources']
         for result in results:
