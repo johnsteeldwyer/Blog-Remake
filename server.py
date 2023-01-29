@@ -111,7 +111,7 @@ def index(current_page):
         .where(and_(BlogPost.id <= first_displayed, BlogPost.id > last_displayed))
         .order_by(BlogPost.id.desc())
     ).scalars()
-    
+            
     return render_template(
         "index.html",
         posts=posts,
@@ -161,35 +161,38 @@ def create_post():
     form = PostForm()
     last_post_id = (db.session.execute(db.select(BlogPost).order_by(BlogPost.id.desc())).scalar()).id
     post_number = last_post_id + 1
-    print(last_post_id)
     
     if form.validate_on_submit():
+        
+        # Update Database
+        new_post = BlogPost(
+            id = post_number,
+            date = datetime.datetime.now().strftime("%d-%m-%Y"),
+            title = form.title.data,
+            subtitle = form.subtitle.data,
+            categories = form.categories.data,
+            body = form.body.data,
+            author_id = current_user.id
+            # captions = form.captions.data
+        )
+        db.session.add(new_post)
+        db.session.commit()
+
         # Save Photos
-        if not os.path.exists(f'static/assets/pics/post{post_number}'):
-            os.makedirs(f'static/assets/pics/post{post_number}')
         count = 0
         for field in form:
             if field.type == 'FileField':
                 if not field.data:
                     continue
                 pic = field.data
-                file_filename = f"pic{count}.jpg"
-                pic.save(os.path.join(f'static/assets/pics/post{post_number}', file_filename))
+                url = (upload(pic, folder=f"post{post_number}", public_id=count))['url']
+                img = ImageUrls(
+                    post_id = post_number,
+                    url = url
+                )
+                db.session.add(img)
+                db.session.commit()
                 count += 1
-        
-        # Update Database
-        new_post = BlogPost(
-            date = datetime.datetime.now().strftime("%d-%m-%Y"),
-            title = form.title.data,
-            subtitle = form.subtitle.data,
-            categories = form.categories.data,
-            body = form.body.data,
-            parent_id = current_user.id
-            # captions = form.captions.data
-        )
-        db.session.add(new_post)
-        db.session.commit()
-        
         return redirect("/")
     return render_template("create-post.html", form=form)
 
@@ -311,7 +314,7 @@ def create_db():
         db.session.add(new_post)
         db.session.commit()
         
-    for i in range(31):
+    for i in range(1, 31):
         results = (cloudinary.Search().expression(f"folder=post{i}").sort_by("public_id","asc").execute())['resources']
         for result in results:
             img = ImageUrls(

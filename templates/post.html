@@ -1,5 +1,12 @@
 {% extends "base/base.html" %}
 {% block content %}
+<script>
+    function warning() {
+        confirm("Clicking 'OK' will permanently delete this post and all associated images!\n\nAre you sure?")
+    }
+
+</script>
+
 <!-- Page Header-->
 <header class="masthead" style="background-image:
     url('{{ post.images[0].url }}')">
@@ -95,10 +102,4 @@
 
 <hr>
 
-    <script>
-        function warning() {
-            confirm("Clicking 'OK' will permanently delete this post and all associated images!\n\nAre you sure?")
-        }
-
-    </script>
     {% endblock %}

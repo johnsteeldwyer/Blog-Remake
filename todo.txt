@@ -3,6 +3,5 @@
 - make top bar text a little bigger so search bar isn't too big (or shrink search bar)
 - add categories search (like index page but only if catories are relevant)
 - add captions
-- remove unused libraries/packages
 - add profile pictures to accounts
-- delete comments if admin
+- fix delete post feature
