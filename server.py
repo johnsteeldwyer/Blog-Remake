@@ -93,8 +93,8 @@ class ImageUrls(db.Model):
     post = db.relationship("BlogPost", back_populates="images")
     post_id = db.Column(db.Integer, db.ForeignKey("blogpost.id"))
     
-# with app.app_context():
-#     db.create_all()
+with app.app_context():
+    db.create_all()
 
 
 @app.route("/<current_page>")
@@ -296,15 +296,6 @@ def create_db():
         db.session.commit()
     except:
         pass
-    for i in range(31):
-        results = (cloudinary.Search().expression(f"folder=post{i}").sort_by("public_id","asc").execute())['resources']
-        for result in results:
-            img = ImageUrls(
-                url = result['url'],
-                post_id = i
-            )
-            db.session.add(img)
-    db.session.commit()
 
     for post in data:
         new_post = BlogPost(
@@ -319,6 +310,16 @@ def create_db():
         )
         db.session.add(new_post)
         db.session.commit()
+        
+    for i in range(31):
+        results = (cloudinary.Search().expression(f"folder=post{i}").sort_by("public_id","asc").execute())['resources']
+        for result in results:
+            img = ImageUrls(
+                url = result['url'],
+                post_id = i
+            )
+            db.session.add(img)
+    db.session.commit()
     return redirect('/')
 
 if __name__ == "__main__":
