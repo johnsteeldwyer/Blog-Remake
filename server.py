@@ -31,6 +31,7 @@ cloudinary.config(
 )
 
 # Connect to Database
+# app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///blog.db"
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("POSTGRES_URL", "sqlite:///blog.db")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
@@ -61,6 +62,7 @@ class BlogPost(db.Model):
     author_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     author = db.relationship("User", back_populates="posts")
     comments = db.relationship("Comment", back_populates="post")
+    images = db.relationship("ImageUrls", back_populates="post")
 
 
 class User(UserMixin, db.Model):
@@ -83,6 +85,13 @@ class Comment(db.Model):
     author_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     author = db.relationship("User", back_populates="comments")
 
+
+class ImageUrls(db.Model):
+    __tablename__ = 'imageurls'
+    id = db.Column(db.Integer, primary_key=True)
+    url = db.Column(db.String(250))
+    post = db.relationship("BlogPost", back_populates="images")
+    post_id = db.Column(db.Integer, db.ForeignKey("blogpost.id"))
     
 with app.app_context():
     db.create_all()
@@ -103,16 +112,11 @@ def index(current_page):
         .order_by(BlogPost.id.desc())
     ).scalars()
     
-    result = cloudinary.Search().expression("folder=post30").sort_by("public_id","asc").execute()
-    pic = result['resources'][0]['url']
-    print(result['resources'][0]['url'])
-    
     return render_template(
         "index.html",
         posts=posts,
         next_page=(current_page + 1),
         prev_page=(current_page - 1),
-        pic=pic
     )
 
 
@@ -288,6 +292,16 @@ def create_db():
             password = generate_password_hash("hello", method='pbkdf2:sha256', salt_length=24)
     )
     db.session.add(admin)
+    db.session.commit()
+
+    for i in range(31):
+        results = (cloudinary.Search().expression(f"folder=post{i}").sort_by("public_id","asc").execute())['resources']
+        for result in results:
+            img = ImageUrls(
+                url = result['url'],
+                post_id = i
+            )
+            db.session.add(img)
     db.session.commit()
 
     for post in data:
