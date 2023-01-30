@@ -149,7 +149,7 @@ def post(id):
         post=post,
         categories=categories,
         captions=captions,
-        captionlen=len(captions),
+        number_of_images=len(post.images),
         form=form,
         comments = comments
     )
